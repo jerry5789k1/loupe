@@ -411,6 +411,11 @@ export function createArtifactSdk(deriveQueueKey, isNativeInteractive = isNative
       if (!(el instanceof Element) || isLavishUi(el)) return;
       if (isIntentionalHorizontalScroller(el)) return;
       elements.push(el);
+      // Audit the <svg> box itself, but never descend into its internals: SVG uses its
+      // own viewBox/transform coordinate model, so the HTML overflow heuristics here
+      // produce false positives — e.g. svg-pan-zoom's transformed viewport/controls
+      // look like parent-overflow once the diagram is panned or zoomed.
+      if (el.tagName && el.tagName.toLowerCase() === "svg") return;
       for (const child of el.children) walk(child);
     }
 

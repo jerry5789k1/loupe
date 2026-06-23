@@ -253,6 +253,14 @@ test("a click selects the element (pill) instead of opening the note card immedi
   assert.match(js, /lavish-pill-add/);
 });
 
+test("layout audit does not descend into SVG internals (pan/zoom transforms are not HTML overflow)", () => {
+  const js = createSdkJs("abc");
+
+  // The walk must stop at <svg> so svg-pan-zoom's transformed viewport/controls don't
+  // register as element-parent-overflow when the diagram is panned or zoomed.
+  assert.match(js, /el\.tagName\.toLowerCase\(\) === "svg"/);
+});
+
 test("annotation card shadow styles use Lavish design-system variables", () => {
   const js = createSdkJs("abc");
 
