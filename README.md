@@ -73,12 +73,12 @@ loupe spec spec/guest-checkout.html  # on Execute: write the companion spec (gue
 
 **Zero setup.** Loupe is an AXI — any capable agent can run the CLI with nothing installed. Just tell your agent:
 
-> Use `npx @jerry5789k1/loupe new <file>` to map out what we discussed before building it.
+> Use `npx @marshalliqiu/loupe new <file>` to map out what we discussed before building it.
 
 **Session hook.** Want Loupe's ambient context — including your live open sessions — fed into every agent session instead of loading on demand? Install globally and opt into the hook:
 
 ```sh
-npm install -g @jerry5789k1/loupe
+npm install -g @marshalliqiu/loupe
 loupe setup hooks
 ```
 
