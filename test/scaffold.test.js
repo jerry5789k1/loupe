@@ -43,8 +43,12 @@ test("the Gate sits before the Code Lens and is a soft signal (no UI lock)", () 
 test("the Code Lens never blocks editing or annotation (HTML is the source of truth)", () => {
   const html = createScaffoldHtml({ title: "x" });
   assert.doesNotMatch(html, /loupe-lock-overlay/, "no blocking lock overlay");
-  assert.doesNotMatch(html, /pointer-events: none/, "nothing disables interaction/annotation");
   assert.doesNotMatch(html, /loupe-codelens locked/, "code lens is not shipped locked");
+  // pointer-events:none is only allowed on the decorative gesture hint, where it makes
+  // the hint click-THROUGH (the opposite of blocking). Nothing else may disable interaction.
+  for (const line of html.match(/[^\n]*pointer-events: none[^\n]*/g) || []) {
+    assert.match(line, /loupe-diagram-hint/, "pointer-events:none only on the click-through hint, never on content");
+  }
 });
 
 test("--product-only drops the Gate and Code Lens", () => {
@@ -112,6 +116,11 @@ test("scaffold makes diagrams pannable/zoomable at full size", () => {
   // pan/zoom must not swallow the click the annotation picker needs (artifact-sdk.js
   // listens for click in capture phase); preventMouseEventsDefault:false keeps nodes annotatable.
   assert.match(html, /preventMouseEventsDefault: false/);
+  // A plain wheel must scroll the page, not hijack it: native wheel-zoom off, and
+  // zoom only on a modifier+wheel at the cursor.
+  assert.match(html, /mouseWheelZoomEnabled: false/);
+  assert.match(html, /e\.ctrlKey \|\| e\.metaKey/);
+  assert.match(html, /zoomAtPointBy/);
   // The fixed-height frame must not overflow, or the layout audit flags clipped-text:
   // zero the <pre> margin and block the svg to kill its baseline descender gap.
   assert.match(html, /\.loupe-diagram \.mermaid \{[^}]*margin: 0/);

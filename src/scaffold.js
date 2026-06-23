@@ -457,9 +457,11 @@ export function createScaffoldHtml({
   .loupe-card { background: var(--surface); border: 1px solid var(--hair); border-radius: var(--radius); padding: 22px; }
 
   /* A pannable/zoomable viewport: the diagram renders at full size inside a fixed
-     frame so it never shrinks to fit the card. Drag empty space to pan, wheel to zoom. */
-  .loupe-diagram { position: relative; height: clamp(320px, 52vh, 580px); min-width: 0; overflow: hidden; border: 1px solid var(--hair); border-radius: var(--radius); background: var(--surface); cursor: grab; }
+     frame so it never shrinks to fit the card. Drag to pan, ⌘/Ctrl+wheel to zoom. */
+  .loupe-diagram { position: relative; height: clamp(320px, 52vh, 580px); min-width: 0; overflow: hidden; border: 1px solid var(--hair); border-radius: var(--radius); background: var(--surface); cursor: grab; user-select: none; }
   .loupe-diagram:active { cursor: grabbing; }
+  /* gesture hint — purely informational, never intercepts clicks */
+  .loupe-diagram-hint { position: absolute; top: 8px; right: 10px; z-index: 2; pointer-events: none; font-size: 11px; color: var(--ink-3); background: rgba(255,255,255,0.82); border: 1px solid var(--hair); border-radius: 999px; padding: 2px 9px; }
   /* margin:0 — <pre>'s default 1em top/bottom margin (~26px) otherwise overflows the
      fixed-height frame and trips the layout audit's clipped-text check. */
   .loupe-diagram .mermaid { width: 100%; height: 100%; min-width: 0; margin: 0; padding: 0; }
@@ -558,20 +560,42 @@ ${lenses}
       svg.style.maxWidth = "none";
       svg.style.width = "100%";
       svg.style.height = "100%";
-      svgPanZoom(svg, {
+      const pz = svgPanZoom(svg, {
         zoomEnabled: true,
-        controlIconsEnabled: true, // built-in zoom in / out / reset(fit) buttons
+        controlIconsEnabled: true, // discoverable + / − / reset(fit) buttons
         fit: true,
         center: true,
         minZoom: 0.2,
         maxZoom: 12,
         dblClickZoomEnabled: false, // leave double-click free; pan is drag, annotate is click
-        // CRITICAL: do NOT preventDefault on mouse events. Loupe's annotation picker
-        // listens for click events (capture phase) on the diagram; the default true
-        // here calls preventDefault on mousedown and swallows that click, so a node can
-        // no longer be annotated. false keeps drag-to-pan working AND clicks annotatable.
+        // A plain wheel must scroll the PAGE, not zoom the diagram — otherwise the page
+        // scroll gets hijacked whenever the cursor is over a diagram (the reported bug).
+        mouseWheelZoomEnabled: false,
+        // Do NOT preventDefault on mouse events: Loupe's annotation picker listens for
+        // click (capture phase); the default true swallows that click. false keeps
+        // drag-to-pan AND click-to-annotate working.
         preventMouseEventsDefault: false,
       });
+      const frame = svg.closest(".loupe-diagram");
+      // Zoom is intentional only: ⌘/Ctrl + wheel zooms at the cursor; a plain wheel is
+      // ignored here so the page scrolls normally. (The +/−/reset buttons also zoom.)
+      frame.addEventListener(
+        "wheel",
+        (e) => {
+          if (!(e.ctrlKey || e.metaKey)) return; // plain scroll → let the page handle it
+          e.preventDefault();
+          const rect = svg.getBoundingClientRect();
+          pz.zoomAtPointBy(e.deltaY < 0 ? 1.15 : 1 / 1.15, { x: e.clientX - rect.left, y: e.clientY - rect.top });
+        },
+        { passive: false },
+      );
+      // discoverability hint, pointer-events:none so it never blocks a click
+      if (!frame.querySelector(".loupe-diagram-hint")) {
+        const hint = document.createElement("div");
+        hint.className = "loupe-diagram-hint";
+        hint.textContent = "drag to pan · ⌘/Ctrl + scroll to zoom";
+        frame.appendChild(hint);
+      }
     }
   } catch (e) {
     console.error("Loupe: pan/zoom init failed (diagrams stay static)", e);
