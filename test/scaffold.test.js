@@ -109,6 +109,9 @@ test("scaffold makes diagrams pannable/zoomable at full size", () => {
   assert.match(html, /svg-pan-zoom@3/);
   assert.match(html, /\.loupe-diagram \.mermaid svg/);
   assert.match(html, /controlIconsEnabled: true/);
+  // pan/zoom must not swallow the click the annotation picker needs (artifact-sdk.js
+  // listens for click in capture phase); preventMouseEventsDefault:false keeps nodes annotatable.
+  assert.match(html, /preventMouseEventsDefault: false/);
 });
 
 test("interactions degrade gracefully without window.lavish", () => {

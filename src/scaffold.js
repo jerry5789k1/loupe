@@ -561,6 +561,11 @@ ${lenses}
         minZoom: 0.2,
         maxZoom: 12,
         dblClickZoomEnabled: false, // leave double-click free; pan is drag, annotate is click
+        // CRITICAL: do NOT preventDefault on mouse events. Loupe's annotation picker
+        // listens for click events (capture phase) on the diagram; the default true
+        // here calls preventDefault on mousedown and swallows that click, so a node can
+        // no longer be annotated. false keeps drag-to-pan working AND clicks annotatable.
+        preventMouseEventsDefault: false,
       });
     }
   } catch (e) {
