@@ -1,15 +1,16 @@
 {
-  "name": "lavish-axi",
+  "name": "loupe",
   "version": "0.1.31",
   "packageManager": "pnpm@11.1.1",
-  "description": "HTML is the new markdown. Lavish is the new editor for your HTML artifacts.",
+  "description": "Inspect a change before you build it: Loupe turns a proposed change into a structured visual spec-review surface. Forked from lavish-axi.",
   "type": "module",
   "bin": {
+    "loupe": "dist/cli.mjs",
     "lavish-axi": "dist/cli.mjs"
   },
   "files": [
     "dist",
-    "skills/lavish",
+    "skills/loupe",
     "lavish-editor-marketing/renders/lavish-editor-marketing.gif",
     "LICENSE",
     "README.md"
@@ -48,22 +49,23 @@
     "node": ">=22"
   },
   "keywords": [
-    "axi",
+    "spec",
+    "review",
     "agent",
     "cli",
     "html",
-    "review",
-    "collaboration"
+    "diagram",
+    "visualization"
   ],
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kunchenguid/lavish-axi.git"
+    "url": "git+https://github.com/jerry5789k1/loupe.git"
   },
   "bugs": {
-    "url": "https://github.com/kunchenguid/lavish-axi/issues"
+    "url": "https://github.com/jerry5789k1/loupe/issues"
   },
-  "homepage": "https://github.com/kunchenguid/lavish-axi#readme",
+  "homepage": "https://github.com/jerry5789k1/loupe#readme",
   "publishConfig": {
     "access": "public"
   }

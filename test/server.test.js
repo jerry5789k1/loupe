@@ -319,8 +319,8 @@ test("chrome top bar follows the design mock wordmark and overflow menu treatmen
   const html = createChromeHtml({ key: "abc", file: "/tmp/artifact.html" });
   const css = await chromeCssSource();
 
-  assert.match(html, /class="brand-mark">Lavish/);
-  assert.match(html, /class="brand-support">Editor/);
+  assert.match(html, /class="brand-mark">Loupe/);
+  assert.match(html, /class="brand-support">review/);
   assert.match(css, /font-family:var\(--font-serif\)/);
   assert.match(css, /letter-spacing:\.18em/);
   assert.match(html, /class="more-button" id="moreButton"/);

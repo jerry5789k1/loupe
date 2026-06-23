@@ -2,12 +2,36 @@
 
 This file provides guidance to coding agents when working with code in this repository.
 
+## What Loupe is (read first)
+
+Loupe is a **fork of lavish-axi**, repurposed for the spec phase: it turns a proposed change into a
+structured visual review surface so a developer can grasp it by looking and clicking instead of reading
+walls of text. Every Loupe artifact has a guaranteed shape — two **Lenses** (Product, then a Code
+Lens) each with **§A Current World** (blast radius highlighted), **§B Grill** (click-to-answer cards),
+**§C Goal Vision** (before → after). A **Gate** (a _soft signal_, ADR-0004) tells the agent to fill the
+Code Lens once the product intent is locked; it never blocks editing or annotation — the HTML is the
+source of truth and must stay freely editable and annotatable. `--product-only` drops the Code Lens.
+
+Loupe = lavish-axi's **transport layer, reused unchanged** + a thin **structure layer** on top:
+
+- `src/scaffold.js` + `loupe new <file>` — generate the guaranteed two-lens scaffold (with the Gate and the Decision section).
+- `src/spec.js` + `loupe spec <file>` — write the companion markdown spec on Execute (ADR-0005).
+- `src/cli.js`, `src/skill.js` — Loupe branding and the guidance that teaches the loop.
+- Everything else (`server.js`, `artifact-sdk.js`, session store, long-poll, SSE, live reload, layout audit)
+  is inherited lavish transport, described under "Architecture" below.
+
+The conceptual model lives in `CONTEXT.md`; the foundational decisions in `docs/adr/`; the v1 build
+decisions in `docs/v1-build-decisions.md`. **Internal identifiers stay on the lavish-axi name on purpose**
+(env vars `LAVISH_AXI_*`, state dir `~/.lavish-axi`, the server `app` id, the `window.lavish`/`data-lavish-*`
+SDK contract, the source entry `bin/lavish-axi.js`) — see ADR-0002 and decision D1. Only the user/agent-facing
+surface is "Loupe". The command is `loupe` (with `lavish-axi` kept as an alias).
+
 ## Commands
 
 ```sh
 pnpm run check          # Run build, lint, format check, typecheck, tests, and skill freshness check
 pnpm run build          # Bundle dist/cli.mjs and copy chrome/design assets into dist
-pnpm run build:skill    # Regenerate skills/lavish/SKILL.md from shared CLI guidance
+pnpm run build:skill    # Regenerate skills/loupe/SKILL.md from shared CLI guidance
 pnpm test               # node:test runner (test/*.test.js)
 pnpm run lint           # ESLint over bin src test scripts
 pnpm run format:check   # Prettier check

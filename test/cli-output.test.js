@@ -42,14 +42,14 @@ test("CLI version tracks package.json so release-please bumps reach the publishe
   assert.equal(VERSION, packageJson.version);
 });
 
-test("home output teaches agents when and how to use Lavish Editor", () => {
+test("home output teaches agents when and how to use Loupe", () => {
   const output = createHomeOutput({ bin: `${os.homedir()}/.local/bin/lavish-axi`, sessions: [] });
 
   assert.equal(output.bin, "~/.local/bin/lavish-axi");
-  assert.match(output.description, /Lavish Editor/);
-  assert.match(output.description, /complex response/);
-  assert.match(output.description, /consider using Lavish Editor/);
-  assert.match(output.description, /First generate an interactive HTML artifact/);
+  assert.match(output.description, /Loupe/);
+  assert.match(output.description, /structured visual review surface/);
+  assert.match(output.description, /reading walls of text/);
+  assert.match(output.description, /loupe new <html-file>/);
   assert.deepEqual(output.sessions, []);
   assert.equal("use_cases" in output, false);
   assert.equal("example_use_cases" in output, false);
@@ -67,9 +67,9 @@ test("home output teaches agents when and how to use Lavish Editor", () => {
     output.playbooks.find((item) => item.id === "input")?.use_when,
     "Must be used when the agent needs to collect user input on decisions, choices, preferences, triage, scope, or other structured feedback from within the artifact",
   );
-  assert.ok(output.help.some((item) => item.includes("lavish-axi <html-file>")));
+  assert.ok(output.help.some((item) => item.includes("loupe <html-file>")));
   assert.ok(output.help.some((item) => item.includes("`.lavish/`")));
-  assert.ok(output.help.some((item) => item.includes("lavish-axi playbook <playbook_id>")));
+  assert.ok(output.help.some((item) => item.includes("loupe playbook <playbook_id>")));
   assert.ok(output.help.some((item) => item.includes("combines several playbooks")));
   assert.ok(output.help.some((item) => item.includes("MUST open each matching playbook")));
   assert.ok(output.help.some((item) => item.includes("reference other filesystem assets")));
@@ -77,7 +77,7 @@ test("home output teaches agents when and how to use Lavish Editor", () => {
   assert.ok(output.help.some((item) => item.includes("does not auto-inject")));
   assert.ok(output.help.some((item) => item.includes("portable")));
   assert.ok(output.help.some((item) => item.includes("Tailwind CSS browser runtime v4")));
-  assert.ok(output.help.some((item) => item.includes("lavish-axi design")));
+  assert.ok(output.help.some((item) => item.includes("loupe design")));
   assert.ok(output.help.some((item) => /prefer.*CDN snippet.*hand-writing styles/i.test(item)));
   assert.ok(output.help.some((item) => /unless.*explicitly instructed/i.test(item)));
   assert.ok(output.help.some((item) => /priority order/i.test(item)));
@@ -99,7 +99,7 @@ test("home output teaches agents when and how to use Lavish Editor", () => {
 
 test("home output warns agents that poll is a long poll they must not kill", () => {
   const output = createHomeOutput({ bin: "lavish-axi", sessions: [] });
-  const pollHelp = output.help.find((item) => item.includes("lavish-axi poll <html-file>"));
+  const pollHelp = output.help.find((item) => item.includes("loupe poll <html-file>"));
 
   assert.ok(pollHelp, "home help mentions the poll command");
   assert.match(pollHelp, /long-poll/);
@@ -126,11 +126,11 @@ test("top-level help renders static home output without dynamic sessions", async
 
     assert.equal(result.status, 0, result.stderr || result.stdout);
     assert.match(result.stdout, /playbooks\[7\]/);
-    assert.match(result.stdout, /lavish-axi playbook <playbook_id>/);
+    assert.match(result.stdout, /loupe playbook <playbook_id>/);
     assert.match(result.stdout, /reference other filesystem assets/);
     assert.match(result.stdout, /same directory as the HTML file/);
     assert.match(result.stdout, /Tailwind CSS browser runtime v4/);
-    assert.match(result.stdout, /lavish-axi design/);
+    assert.match(result.stdout, /loupe design/);
     assert.match(result.stdout, /does not auto-inject/);
     assert.match(result.stdout, /prefer.*CDN snippet.*hand-writing styles/i);
     assert.match(result.stdout, /unless.*explicitly instructed/i);
@@ -249,7 +249,7 @@ test("playbook index output lists known playbooks with concise descriptions", ()
     "Must be used when the agent needs to collect user input on decisions, choices, preferences, triage, scope, or other structured feedback from within the artifact",
   );
   assert.ok(output.playbooks.every((playbook) => playbook.use_when.length > 20));
-  assert.ok(output.help.some((item) => item.includes("lavish-axi playbook <playbook_id>")));
+  assert.ok(output.help.some((item) => item.includes("loupe playbook <playbook_id>")));
   assert.ok(output.help.some((item) => item.includes("combines several playbooks")));
   assert.ok(output.help.some((item) => item.includes("MUST open each matching playbook")));
 });
@@ -281,7 +281,7 @@ test("playbook detail output returns focused Lavish-native guidance", () => {
   assert.ok(output.playbook.lavish_notes.some((item) => item.includes("onsubmit")));
   assert.ok(output.playbook.pitfalls.some((item) => item.includes("unclear")));
   assert.ok(output.playbook.pitfalls.some((item) => item.includes("radio change")));
-  assert.ok(output.playbook.lavish_notes.some((item) => item.includes("Lavish")));
+  assert.ok(output.playbook.lavish_notes.some((item) => item.includes("Loupe")));
 });
 
 test("code playbook detail output requires verified @pierre/diffs rendering", () => {
@@ -312,7 +312,7 @@ test("unknown playbook ids produce an actionable validation error", () => {
       assert.ok(error instanceof AxiError);
       assert.equal(error.code, "VALIDATION_ERROR");
       assert.match(error.message, /Unknown playbook/);
-      assert.ok(error.suggestions.some((item) => item.includes("lavish-axi playbook")));
+      assert.ok(error.suggestions.some((item) => item.includes("loupe playbook")));
       return true;
     },
   );
@@ -343,7 +343,7 @@ test("open output keeps the user URL in session data and next_step focused on po
   assert.doesNotMatch(output.next_step, /Tell the user/i);
   assert.doesNotMatch(output.next_step, /http:\/\/localhost:4387\/session\/abc123/);
   assert.match(output.next_step, /Do not respond to the user just yet\. Now you must run/);
-  assert.match(output.next_step, /lavish-axi poll \/tmp\/artifact\.html/);
+  assert.match(output.next_step, /loupe poll \/tmp\/artifact\.html/);
   assert.match(output.next_step, /long-polls until/);
   assert.match(output.next_step, /layout_warnings/);
   assert.match(output.next_step, /in-iframe layout audit/);
@@ -412,22 +412,22 @@ test("layout warning feedback tells agents to fix layout before involving the hu
 
 test("poll wait messages tell watching agents the silence is normal", () => {
   const banner = pollWaitBannerText("/tmp/report.html");
-  assert.match(banner, /\[lavish-axi\]/);
+  assert.match(banner, /\[loupe\]/);
   assert.match(banner, /Long-polling for user feedback/);
   assert.match(banner, /stays silent/);
   assert.match(banner, /leave it running/i);
   assert.match(banner, /queued feedback is never lost/);
 
   const tick = pollWaitTickText(3 * 60_000);
-  assert.match(tick, /\[lavish-axi\]/);
+  assert.match(tick, /\[loupe\]/);
   assert.match(tick, /Still waiting for user feedback \(3m\)/);
   assert.match(tick, /leave this running/i);
 
   const interrupted = pollInterruptedText("/tmp/report.html");
-  assert.match(interrupted, /\[lavish-axi\]/);
+  assert.match(interrupted, /\[loupe\]/);
   assert.match(interrupted, /Poll interrupted/);
   assert.match(interrupted, /user may still be reviewing/);
-  assert.match(interrupted, /lavish-axi poll \/tmp\/report\.html/);
+  assert.match(interrupted, /loupe poll \/tmp\/report\.html/);
   assert.match(interrupted, /queued feedback is never lost/);
 });
 
@@ -514,7 +514,7 @@ test("waiting next step reassures agents that re-running poll loses nothing", ()
     response: { status: "waiting" },
   });
 
-  assert.match(output.next_step, /lavish-axi poll \/tmp\/report\.html/);
+  assert.match(output.next_step, /loupe poll \/tmp\/report\.html/);
   assert.match(output.next_step, /without --timeout-ms/);
   assert.match(output.next_step, /queued feedback is never lost/);
 });
@@ -733,7 +733,7 @@ test("open can resume a session without opening another browser window", () => {
   assert.doesNotMatch(getCommandHelp("playbook"), new RegExp(`${"di"}ff, input`));
   assert.doesNotMatch(getCommandHelp("playbook"), /interactive/);
   assert.match(getCommandHelp("design"), /DaisyUI/);
-  assert.match(getCommandHelp("design"), /lavish-axi design/);
+  assert.match(getCommandHelp("design"), /loupe design/);
   assert.match(getCommandHelp("design"), /portable/);
   assert.match(getCommandHelp("design"), /prefer.*CDN snippet.*hand-writing styles/i);
   assert.match(getCommandHelp("design"), /unless.*explicitly instructed/i);
@@ -754,8 +754,8 @@ test("polling a file without an active session tells the agent to open it first"
     (error) => {
       assert.ok(error instanceof AxiError);
       assert.equal(error.code, "NOT_FOUND");
-      assert.match(error.message, /No active Lavish Editor session/);
-      assert.ok(error.suggestions.some((item) => item.includes("lavish-axi /tmp/report.html")));
+      assert.match(error.message, /No active Loupe session/);
+      assert.ok(error.suggestions.some((item) => item.includes("loupe /tmp/report.html")));
       return true;
     },
   );
@@ -767,8 +767,8 @@ test("network fetch failures become structured Lavish server errors", async () =
     (error) => {
       assert.ok(error instanceof AxiError);
       assert.equal(error.code, "SERVER_ERROR");
-      assert.match(error.message, /Lavish Editor server connection failed/);
-      assert.ok(error.suggestions.some((item) => item.includes("lavish-axi server --verbose")));
+      assert.match(error.message, /Loupe server connection failed/);
+      assert.ok(error.suggestions.some((item) => item.includes("loupe server --verbose")));
       return true;
     },
   );
@@ -820,7 +820,7 @@ test("fetchJson reports interrupted response body failures without retrying", as
       (error) => {
         assert.ok(error instanceof AxiError);
         assert.equal(error.code, "SERVER_ERROR");
-        assert.match(error.message, /Lavish Editor poll response was interrupted/);
+        assert.match(error.message, /Loupe poll response was interrupted/);
         return true;
       },
     );

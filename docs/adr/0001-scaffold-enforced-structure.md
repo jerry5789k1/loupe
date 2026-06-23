@@ -1,0 +1,7 @@
+# Loupe enforces structure with a code-generated scaffold, not free-form HTML or a rigid template
+
+Loupe's whole reason to exist is to _guarantee_ a low-cognitive-load structure (Current World + Blast Radius → Grill → Goal Vision, across the Product and Code Lenses). lavish-axi, the upstream we forked, is a pure transport: it serves whatever HTML the agent writes and only nudges structure through prompt-level guidance (`skill.js`, `playbooks.js`) — exactly the "ask the agent nicely" approach that produced the bullet-list-of-nouns artifacts we want to eliminate.
+
+We rejected two ends. A **rigid template engine** (agent emits JSON, code renders fixed HTML) would guarantee structure but kill the conceptual diagrams — those require the agent to _judge_, from the actual codebase, what to draw. **Prompt-only guidance** gives no guarantee at all. We chose the **scaffold hybrid**: Loupe code generates the section skeleton, the mandatory Gate between Lenses, the mermaid containers, and the interactive Grill Card / before-after components, while the agent fills the content slots (what each diagram actually shows). Structure and interactivity are guaranteed by code; meaning is supplied by the agent.
+
+Hard to reverse (it is the core architecture), surprising to a reader who knows lavish only nudges via prompts, and the result of a real trade-off against both a template engine and prompt-only guidance.

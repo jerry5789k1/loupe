@@ -4,17 +4,13 @@ import test from "node:test";
 import { createHomeOutput } from "../src/cli.js";
 import { SKILL_DESCRIPTION, createSkillMarkdown } from "../src/skill.js";
 
-function skillCommandText(text) {
-  return text.replaceAll("`lavish-axi", "`npx -y lavish-axi");
-}
-
-test("createSkillMarkdown emits valid frontmatter naming the lavish skill", () => {
+test("createSkillMarkdown emits valid frontmatter naming the loupe skill", () => {
   const md = createSkillMarkdown();
   assert.ok(md.startsWith("---\n"), "starts with frontmatter fence");
   const end = md.indexOf("\n---\n", 4);
   assert.ok(end > 0, "frontmatter is closed");
   const frontmatter = md.slice(4, end);
-  assert.match(frontmatter, /^name: lavish$/m);
+  assert.match(frontmatter, /^name: loupe$/m);
   assert.match(frontmatter, /^description: /m);
   assert.match(frontmatter, /^argument-hint: /m);
   assert.ok(frontmatter.includes(SKILL_DESCRIPTION), "frontmatter carries the skill description");
@@ -24,7 +20,7 @@ test("createSkillMarkdown emits Hermes Agent metadata in frontmatter", () => {
   const md = createSkillMarkdown();
   const frontmatter = md.slice(4, md.indexOf("\n---\n", 4));
 
-  assert.match(frontmatter, /^author: Kun Chen \(kunchenguid\)$/m);
+  assert.match(frontmatter, /^author: jerry5789k1 \(fork of lavish-axi by Kun Chen\)$/m);
   assert.match(frontmatter, /^metadata:\n {2}hermes:\n {4}tags: \[[^\]]+\]\n {4}category: \S+$/m);
   assert.doesNotMatch(frontmatter, /^version:/m, "version is omitted to avoid release churn");
 });
@@ -39,9 +35,9 @@ test("createSkillMarkdown handles explicit /lavish invocation arguments", () => 
 
 test("createSkillMarkdown mirrors the no-args home output", () => {
   const md = createSkillMarkdown();
-  const home = createHomeOutput({ bin: "lavish-axi", sessions: [], includeSessions: false });
+  const home = createHomeOutput({ bin: "loupe", sessions: [], includeSessions: false });
 
-  assert.ok(md.includes(skillCommandText(home.description)), "includes the product description");
+  assert.ok(md.includes(home.description), "includes the product description");
 
   for (const item of home.visual_guidance) {
     assert.ok(md.includes(item), `includes visual guidance: ${item.slice(0, 32)}...`);
@@ -53,8 +49,7 @@ test("createSkillMarkdown mirrors the no-args home output", () => {
   }
 
   for (const item of home.help) {
-    const skillItem = skillCommandText(item);
-    assert.ok(md.includes(skillItem), `includes help: ${skillItem.slice(0, 32)}...`);
+    assert.ok(md.includes(item), `includes help: ${item.slice(0, 32)}...`);
   }
 });
 
@@ -78,12 +73,27 @@ test("createSkillMarkdown omits setup hooks guidance", () => {
   assert.doesNotMatch(md, /setup hooks/);
 });
 
-test("createSkillMarkdown uses non-interactive npx commands", () => {
+test("createSkillMarkdown teaches the three-grade annotation triage", () => {
+  const md = createSkillMarkdown();
+  assert.match(md, /Tweak/);
+  assert.match(md, /Follow-up/);
+  assert.match(md, /Directional/);
+  assert.match(md, /reopening the product intent|reverse gate/i);
+});
+
+test("home help carries the annotation-triage protocol for the SessionStart hook", () => {
+  const home = createHomeOutput({ bin: "loupe", sessions: [], includeSessions: false });
+  const triage = home.help.find((item) => /Triage each annotation/.test(item));
+  assert.ok(triage, "home help mentions annotation triage");
+  assert.match(triage, /Tweak/);
+  assert.match(triage, /Follow-up/);
+  assert.match(triage, /Directional/);
+});
+
+test("createSkillMarkdown drives the loupe CLI directly, not npx", () => {
   const md = createSkillMarkdown();
 
-  assert.match(md, /`npx -y lavish-axi <html-file>`/);
-  assert.match(md, /If lavish-axi output shows a follow-up command starting with `lavish-axi`/);
-  assert.match(md, /run it as `npx -y lavish-axi/);
-  assert.doesNotMatch(md, /`npx lavish-axi/);
-  assert.doesNotMatch(md, /Run `lavish-axi/);
+  assert.match(md, /`loupe new <html-file>`/);
+  assert.match(md, /`loupe poll <html-file>`/);
+  assert.doesNotMatch(md, /npx/, "the fork is run via the linked loupe bin, not npx");
 });
