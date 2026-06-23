@@ -540,10 +540,11 @@ ${lenses}
 
 <script type="module">
   import mermaid from "${MERMAID_CDN}";
-  // useMaxWidth:false lets each diagram render at its natural size; svg-pan-zoom then
-  // fits it into the .loupe-diagram viewport, so a big flow stays readable instead of
-  // being scaled down to the card width.
-  mermaid.initialize({ startOnLoad: false, theme: "base", securityLevel: "loose", flowchart: { useMaxWidth: false } });
+  // useMaxWidth:true makes mermaid emit a viewBox, so each SVG scales to fit its frame
+  // immediately (no transient natural-size overflow before svg-pan-zoom's async CDN
+  // import resolves — that overflow tripped the layout audit). The tall .loupe-diagram
+  // frame + svg-pan-zoom fit then enlarge the diagram to fill the frame, so it stays big.
+  mermaid.initialize({ startOnLoad: false, theme: "base", securityLevel: "loose", flowchart: { useMaxWidth: true } });
   try {
     await mermaid.run();
   } catch (e) {

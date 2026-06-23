@@ -103,9 +103,9 @@ test("scaffold wires mermaid, the hit (blast radius) classDef, and grill auto-wi
 
 test("scaffold makes diagrams pannable/zoomable at full size", () => {
   const html = createScaffoldHtml({ title: "x" });
-  // Diagrams render at natural size (not shrunk to the card)...
-  assert.match(html, /useMaxWidth: false/);
-  // ...then svg-pan-zoom fits each into its viewport.
+  // useMaxWidth:true keeps a viewBox (no transient overflow); svg-pan-zoom then
+  // fits/enlarges each diagram to fill its tall viewport.
+  assert.match(html, /useMaxWidth: true/);
   assert.match(html, /svg-pan-zoom@3/);
   assert.match(html, /\.loupe-diagram \.mermaid svg/);
   assert.match(html, /controlIconsEnabled: true/);
