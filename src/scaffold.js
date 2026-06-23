@@ -585,7 +585,10 @@ ${lenses}
           if (!(e.ctrlKey || e.metaKey)) return; // plain scroll → let the page handle it
           e.preventDefault();
           const rect = svg.getBoundingClientRect();
-          pz.zoomAtPointBy(e.deltaY < 0 ? 1.15 : 1 / 1.15, { x: e.clientX - rect.left, y: e.clientY - rect.top });
+          // gentle step per wheel tick — wheels/trackpads fire many events, so a small
+          // factor keeps zoom controllable instead of jumping.
+          const step = 1.06;
+          pz.zoomAtPointBy(e.deltaY < 0 ? step : 1 / step, { x: e.clientX - rect.left, y: e.clientY - rect.top });
         },
         { passive: false },
       );
