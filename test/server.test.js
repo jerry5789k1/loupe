@@ -237,7 +237,20 @@ test("turning annotation mode off clears selection and floating card", () => {
 test("annotation card title renders selected tag as an html element name", () => {
   const js = createSdkJs("abc");
 
-  assert.match(js, /"Annotate &lt;" \+ c\.tag \+ "&gt;"/);
+  // Heading is built as plain text ("Annotate <tag>") and set via textContent (injection-safe;
+  // angle brackets render literally), and includes the selected element's label.
+  assert.match(js, /"Annotate <" \+ c\.tag \+ ">"/);
+  assert.match(js, /headingEl\.textContent = headingText/);
+});
+
+test("a click selects the element (pill) instead of opening the note card immediately", () => {
+  const js = createSdkJs("abc");
+
+  // Step 1 is selection: the click handler calls selectElement, which shows a pill with
+  // an "Add note" button; the note card opens from that button or Enter, not on the click.
+  assert.match(js, /selectElement\(t\)/);
+  assert.match(js, /lavish-select-pill/);
+  assert.match(js, /lavish-pill-add/);
 });
 
 test("annotation card shadow styles use Lavish design-system variables", () => {

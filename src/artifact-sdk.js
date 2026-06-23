@@ -647,20 +647,75 @@ export function createArtifactSdk(deriveQueueKey, isNativeInteractive = isNative
 
     shadow = host.attachShadow({ mode: "open" });
     const style = document.createElement("style");
-    style.textContent = `:host{all:initial;position:fixed;z-index:2147483647;left:0;top:0;color-scheme:dark;--ink-900:#0f1115;--ink-800:#11141a;--ink-700:#171a21;--ink-600:#1c212b;--steel-700:#2a2f3a;--steel-600:#303745;--steel-500:#3c4557;--steel-400:#8c96aa;--steel-300:#aeb6c6;--steel-200:#b9c0cf;--steel-100:#d8deea;--cream-50:#fffbf3;--cream-100:#f7f3ea;--cream-200:#e8e1cf;--brass-500:#f4c95d;--brass-400:#ffd877;--brass-ink:#17130a;--bg:var(--ink-900);--bg-panel:var(--ink-800);--bg-elevated:var(--ink-600);--fg:var(--cream-100);--fg-faint:var(--steel-300);--border:var(--steel-600);--accent:#f4c95d;--accent-hover:#ffd877;--font-sans:Geist,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;--font-mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--radius-md:10px;--radius-xl:14px;--shadow-floating:0 20px 70px rgba(0,0,0,.35);font-family:var(--font-sans)}*{box-sizing:border-box}:focus-visible{outline:2px solid var(--accent);outline-offset:2px}.lavish-text-highlight{position:fixed;pointer-events:none;background:rgba(244,201,93,.28);border-radius:2px;box-shadow:0 0 0 1px rgba(244,201,93,.45)}.lavish-annotation-card{position:fixed;width:min(320px,calc(100vw - 24px));padding:12px;border-radius:var(--radius-xl);background:var(--bg-panel);color:var(--fg);border:1px solid var(--accent);box-shadow:var(--shadow-floating);font:14px/1.4 var(--font-sans)}.lavish-heading{font-weight:700;margin-bottom:6px}.lavish-annotation-card textarea{width:100%;min-height:86px;resize:vertical;border-radius:var(--radius-md);border:1px solid var(--border);background:var(--bg);color:var(--fg);padding:9px;font:inherit;font-family:var(--font-sans)}.lavish-annotation-card textarea::placeholder{color:var(--fg-faint)}.lavish-annotation-card .lavish-hint{margin-top:6px;font-size:11px;color:var(--fg-faint)}.lavish-annotation-card .lavish-row{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}.lavish-annotation-card button{border:0;border-radius:var(--radius-md);padding:8px 10px;font-family:var(--font-sans);font-size:13px;font-weight:700;cursor:pointer}.lavish-annotation-card button:active{opacity:.85}.lavish-annotation-card .lavish-send{background:var(--accent);color:var(--brass-ink)}.lavish-annotation-card .lavish-send:hover{background:var(--accent-hover)}.lavish-annotation-card .lavish-cancel{background:var(--steel-700);color:var(--fg)}`;
+    style.textContent = `:host{all:initial;position:fixed;z-index:2147483647;left:0;top:0;color-scheme:dark;--ink-900:#0f1115;--ink-800:#11141a;--ink-700:#171a21;--ink-600:#1c212b;--steel-700:#2a2f3a;--steel-600:#303745;--steel-500:#3c4557;--steel-400:#8c96aa;--steel-300:#aeb6c6;--steel-200:#b9c0cf;--steel-100:#d8deea;--cream-50:#fffbf3;--cream-100:#f7f3ea;--cream-200:#e8e1cf;--brass-500:#f4c95d;--brass-400:#ffd877;--brass-ink:#17130a;--bg:var(--ink-900);--bg-panel:var(--ink-800);--bg-elevated:var(--ink-600);--fg:var(--cream-100);--fg-faint:var(--steel-300);--border:var(--steel-600);--accent:#f4c95d;--accent-hover:#ffd877;--font-sans:Geist,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;--font-mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--radius-md:10px;--radius-xl:14px;--shadow-floating:0 20px 70px rgba(0,0,0,.35);font-family:var(--font-sans)}*{box-sizing:border-box}:focus-visible{outline:2px solid var(--accent);outline-offset:2px}.lavish-text-highlight{position:fixed;pointer-events:none;background:rgba(244,201,93,.28);border-radius:2px;box-shadow:0 0 0 1px rgba(244,201,93,.45)}.lavish-annotation-card{position:fixed;width:min(320px,calc(100vw - 24px));padding:12px;border-radius:var(--radius-xl);background:var(--bg-panel);color:var(--fg);border:1px solid var(--accent);box-shadow:var(--shadow-floating);font:14px/1.4 var(--font-sans)}.lavish-heading{font-weight:700;margin-bottom:6px}.lavish-annotation-card textarea{width:100%;min-height:86px;resize:vertical;border-radius:var(--radius-md);border:1px solid var(--border);background:var(--bg);color:var(--fg);padding:9px;font:inherit;font-family:var(--font-sans)}.lavish-annotation-card textarea::placeholder{color:var(--fg-faint)}.lavish-annotation-card .lavish-hint{margin-top:6px;font-size:11px;color:var(--fg-faint)}.lavish-annotation-card .lavish-row{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}.lavish-annotation-card button{border:0;border-radius:var(--radius-md);padding:8px 10px;font-family:var(--font-sans);font-size:13px;font-weight:700;cursor:pointer}.lavish-annotation-card button:active{opacity:.85}.lavish-annotation-card .lavish-send{background:var(--accent);color:var(--brass-ink)}.lavish-annotation-card .lavish-send:hover{background:var(--accent-hover)}.lavish-annotation-card .lavish-cancel{background:var(--steel-700);color:var(--fg)}.lavish-select-pill{position:fixed;display:flex;align-items:center;gap:10px;max-width:min(340px,calc(100vw - 24px));padding:5px 6px 5px 12px;border-radius:999px;background:var(--bg-panel);color:var(--fg);border:1px solid var(--accent);box-shadow:var(--shadow-floating);font:13px/1.3 var(--font-sans)}.lavish-select-pill .lavish-pill-label{display:flex;align-items:center;gap:7px;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.lavish-select-pill .lavish-pill-tag{flex:none;font-family:var(--font-mono);font-size:11px;color:var(--accent)}.lavish-select-pill .lavish-pill-text{overflow:hidden;text-overflow:ellipsis;color:var(--fg);font-weight:700}.lavish-select-pill .lavish-pill-add{flex:none;border:0;border-radius:999px;padding:6px 12px;background:var(--accent);color:var(--brass-ink);font:inherit;font-weight:700;cursor:pointer}.lavish-select-pill .lavish-pill-add:hover{background:var(--accent-hover)}`;
     shadow.appendChild(style);
     return shadow;
   }
 
   function closeCard() {
     if (shadow) {
-      for (const el of [...shadow.querySelectorAll(".lavish-annotation-card")]) el.remove();
+      for (const el of [...shadow.querySelectorAll(".lavish-annotation-card,.lavish-select-pill")]) el.remove();
     }
     clearHighlight(hovered);
     clearHighlight(selected);
     hovered = null;
     clearTextHighlight();
     selected = null;
+  }
+
+  // A short, human label for the element under the cursor: its own text, or — for SVG
+  // primitives like a mermaid node's <polygon>/<rect> whose text lives in a sibling — the
+  // nearest <g>'s text. Lets the selection pill and note card show WHAT you grabbed.
+  function describeTarget(el) {
+    const c = context(el);
+    let label = c.text;
+    if (!label && el && el.closest) {
+      const group = el.closest("g");
+      if (group) label = (group.textContent || "").trim().replace(/\s+/g, " ");
+    }
+    return { tag: c.tag, label: (label || "").slice(0, 60) };
+  }
+
+  // Anchor a floating element above its target (or below if there's no room on top).
+  function positionFloating(el, rect) {
+    const pad = 8;
+    const w = el.offsetWidth;
+    const h = el.offsetHeight;
+    const left = Math.min(Math.max(12, rect.left), window.innerWidth - w - 12);
+    let top = rect.top - h - pad;
+    if (top < 12) top = Math.min(rect.bottom + pad, window.innerHeight - h - 12);
+    el.style.left = left + "px";
+    el.style.top = top + "px";
+  }
+
+  // Step 1 of annotation: a click SELECTS the element (highlight + a pill naming it),
+  // it does NOT open the note card. Clicking another element just re-aims. The note
+  // card opens only from the pill's "Add note" (or Enter). This stops the card from
+  // popping on every click while the user is still aiming.
+  function selectElement(target) {
+    const root = ensureShadow();
+    closeCard();
+    selected = target;
+    highlightElement(selected);
+
+    const d = describeTarget(target);
+    const pill = document.createElement("div");
+    pill.className = "lavish-select-pill";
+    pill.innerHTML =
+      '<span class="lavish-pill-label"><span class="lavish-pill-tag"></span><span class="lavish-pill-text"></span></span>' +
+      '<button class="lavish-pill-add" type="button">✎ Add note</button>';
+    const tagEl = pill.querySelector(".lavish-pill-tag");
+    if (tagEl) tagEl.textContent = "<" + d.tag + ">";
+    const textEl = pill.querySelector(".lavish-pill-text");
+    if (textEl) {
+      if (d.label) textEl.textContent = '"' + d.label + '"';
+      else textEl.remove();
+    }
+    root.appendChild(pill);
+    positionFloating(pill, target.getBoundingClientRect());
+
+    const addButton = /** @type {HTMLButtonElement | null} */ (pill.querySelector(".lavish-pill-add"));
+    if (addButton) addButton.onclick = () => showAnnotationCard(selected);
   }
 
   function showAnnotationCard(target, options = {}) {
@@ -678,20 +733,25 @@ export function createArtifactSdk(deriveQueueKey, isNativeInteractive = isNative
     const rect = options.range ? options.range.getBoundingClientRect() : target.getBoundingClientRect();
     const card = document.createElement("div");
     card.className = "lavish-annotation-card";
-    const heading = c.tag === "text" ? "Annotate text" : "Annotate &lt;" + c.tag + "&gt;";
+    // header names the selected element so the user can confirm they grabbed the right
+    // one — e.g. Annotate <polygon> · "Signed in?". Set via textContent (injection-safe,
+    // and the angle brackets render literally).
+    const label = c.tag === "text" ? "" : describeTarget(target).label;
+    const headingText =
+      c.tag === "text" ? "Annotate text" : "Annotate <" + c.tag + ">" + (label ? ' · "' + label + '"' : "");
     const placeholder =
       c.tag === "text"
         ? "Tell the agent what to change about this text..."
         : "Tell the agent what to change about this element...";
     card.innerHTML =
-      '<div class="lavish-heading">' +
-      heading +
-      '</div><textarea placeholder="' +
+      '<div class="lavish-heading"></div><textarea placeholder="' +
       placeholder +
       '"></textarea><div class="lavish-hint">Enter to queue &middot; ' +
       (/Mac|iP(hone|ad|od)/.test(navigator.platform) ? "⌘" : "Ctrl") +
       '+Enter to send now</div><div class="lavish-row"><button class="lavish-cancel" type="button">Cancel</button><button class="lavish-send" type="button">Queue</button></div>';
     root.appendChild(card);
+    const headingEl = card.querySelector(".lavish-heading");
+    if (headingEl) headingEl.textContent = headingText;
 
     const left = Math.min(Math.max(12, rect.left), window.innerWidth - card.offsetWidth - 12);
     const top = Math.min(Math.max(12, rect.bottom + 8), window.innerHeight - card.offsetHeight - 12);
@@ -821,7 +881,31 @@ export function createArtifactSdk(deriveQueueKey, isNativeInteractive = isNative
         ignoreNextClick = false;
         return;
       }
-      showAnnotationCard(event.target);
+      // Click on empty page chrome clears any selection; click on an element selects it
+      // (step 1). The note card opens later from the pill — see selectElement().
+      const t = event.target;
+      if (t === document.body || t === document.documentElement) {
+        closeCard();
+        return;
+      }
+      selectElement(t);
+    },
+    true,
+  );
+
+  // Esc clears a selection/card; Enter (while a pill is up and not typing) opens the note card.
+  document.addEventListener(
+    "keydown",
+    (event) => {
+      if (!annotationMode || !shadow) return;
+      if (event.key === "Escape") {
+        if (shadow.querySelector(".lavish-select-pill,.lavish-annotation-card")) closeCard();
+        return;
+      }
+      if (event.key === "Enter" && !event.isComposing && selected && shadow.querySelector(".lavish-select-pill")) {
+        event.preventDefault();
+        showAnnotationCard(selected);
+      }
     },
     true,
   );
