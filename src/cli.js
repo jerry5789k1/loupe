@@ -453,8 +453,8 @@ async function setupCommand(args) {
 
   const errors = [];
   installSessionStartHooks({
-    marker: "lavish-axi",
-    binaryNames: ["lavish-axi"],
+    marker: "loupe",
+    binaryNames: ["loupe"],
     distEntrypoints: ["dist/cli.mjs", "bin/lavish-axi.js"],
     homeDir: resolveHookHomeDir(),
     onError: (message) => errors.push(message),

@@ -67,10 +67,32 @@ loupe poll spec/guest-checkout.html  # long-poll for your grill answers and anno
 loupe spec spec/guest-checkout.html  # on Execute: write the companion spec (guest-checkout.spec.md)
 ```
 
-`loupe new` also accepts `--title "..."`, `--problem "..."`, and `--force`.
+`loupe new` also accepts `--title "..."`, `--problem "..."`, `--product-only`, `--greenfield`, and `--force`.
 
-> The command is `loupe`; `lavish-axi` is kept as an alias. If `loupe` isn't on your PATH yet,
-> run it from the repo as `node bin/lavish-axi.js <args>` (or `pnpm link --global`).
+## Install
+
+**Zero setup.** Loupe is an AXI — any capable agent can run the CLI with nothing installed. Just tell your agent:
+
+> Use `npx @jerry5789k1/loupe new <file>` to map out what we discussed before building it.
+
+**Session hook.** Want Loupe's ambient context — including your live open sessions — fed into every agent session instead of loading on demand? Install globally and opt into the hook:
+
+```sh
+npm install -g @jerry5789k1/loupe
+loupe setup hooks
+```
+
+This installs a `SessionStart` hook for Claude Code, Codex, and OpenCode that surfaces open sessions, playbooks, and usage guidance at the start of each session. Restart your agent session afterward so the hook takes effect.
+
+**From source.**
+
+```sh
+git clone https://github.com/jerry5789k1/loupe.git
+cd loupe
+pnpm install --frozen-lockfile
+pnpm run build
+npm link            # puts `loupe` on your PATH (or: pnpm link --global)
+```
 
 ## Develop
 
