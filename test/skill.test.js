@@ -90,10 +90,12 @@ test("home help carries the annotation-triage protocol for the SessionStart hook
   assert.match(triage, /Directional/);
 });
 
-test("createSkillMarkdown drives the loupe CLI directly, not npx", () => {
+test("createSkillMarkdown drives the loupe CLI directly, with an npx fallback", () => {
   const md = createSkillMarkdown();
 
+  // Primary path: the `loupe` bin on PATH (global install or the session hook).
   assert.match(md, /`loupe new <html-file>`/);
   assert.match(md, /`loupe poll <html-file>`/);
-  assert.doesNotMatch(md, /npx/, "the fork is run via the linked loupe bin, not npx");
+  // Zero-install fallback so `npx skills add` works without a separate install.
+  assert.match(md, /npx -y @marshalliqiu\/loupe/, "the skill offers an npx fallback when loupe is not on PATH");
 });

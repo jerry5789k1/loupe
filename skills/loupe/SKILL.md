@@ -14,7 +14,8 @@ metadata:
 Loupe turns a proposed change into a structured visual review surface for the spec phase, so developers grasp a change by looking and clicking instead of reading walls of text. Every Loupe artifact has the same guaranteed shape: §A Current World (a map of the relevant use cases with the blast radius highlighted), §B Grill (interactive cards the developer answers by clicking, each with an open field), and §C Goal Vision (a before -> after of the agreed change). Run `loupe new <html-file>` to scaffold that structure, fill the marked slots, then `loupe <html-file>` to open the review and `loupe poll <html-file>` to receive the developer's grill answers and annotations.
 
 Loupe runs through the `loupe` CLI (a fork of lavish-axi). The commands below assume `loupe`
-is on your PATH; if it is not, run it from the repo as `node bin/lavish-axi.js ...`.
+is on your PATH; if it is not, run it on demand with `npx -y @marshalliqiu/loupe ...` (no install
+needed), or from a source checkout as `node bin/lavish-axi.js ...`.
 
 ## Request
 

@@ -44,7 +44,8 @@ metadata:
 ${home.description}
 
 Loupe runs through the \`loupe\` CLI (a fork of lavish-axi). The commands below assume \`loupe\`
-is on your PATH; if it is not, run it from the repo as \`node bin/lavish-axi.js ...\`.
+is on your PATH; if it is not, run it on demand with \`npx -y @marshalliqiu/loupe ...\` (no install
+needed), or from a source checkout as \`node bin/lavish-axi.js ...\`.
 
 ## Request
 

@@ -75,6 +75,18 @@ loupe spec spec/guest-checkout.html  # on Execute: write the companion spec (gue
 
 > Use `npx @marshalliqiu/loupe new <file>` to map out what we discussed before building it.
 
+**Skill (slash command).** Install the Loupe skill in the [Agent Skills](https://github.com/anthropics/skills) format with `npx skills` — it teaches your agent the full grill → lock → before/after workflow and, in Claude Code, exposes it as `/loupe`:
+
+```sh
+npx skills add jerry5789k1/loupe --skill loupe
+```
+
+The skill runs the CLI on demand via `npx -y @marshalliqiu/loupe`, so nothing else needs to be installed. Then:
+
+```
+/loupe let's inspect the guest-checkout change before building it
+```
+
 **Session hook.** Want Loupe's ambient context — including your live open sessions — fed into every agent session instead of loading on demand? Install globally and opt into the hook:
 
 ```sh
