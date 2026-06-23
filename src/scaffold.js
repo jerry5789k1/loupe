@@ -28,6 +28,11 @@
 
 const MERMAID_CDN = "https://cdn.jsdelivr.net/npm/mermaid@11.15.0/dist/mermaid.esm.min.mjs";
 
+// Pinned svg-pan-zoom (via esm.sh so it loads as an ES module next to mermaid).
+// Each rendered diagram becomes a pannable/zoomable viewport so a large flow is no
+// longer squished to the card width — drag empty space to pan, wheel/buttons to zoom.
+const SVG_PAN_ZOOM_CDN = "https://esm.sh/svg-pan-zoom@3.6.2";
+
 function escapeHtml(value) {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -451,8 +456,12 @@ export function createScaffoldHtml({
 
   .loupe-card { background: var(--surface); border: 1px solid var(--hair); border-radius: var(--radius); padding: 22px; }
 
-  .loupe-diagram { display: flex; justify-content: center; min-width: 0; overflow-x: auto; }
-  .loupe-diagram .mermaid { min-width: 0; }
+  /* A pannable/zoomable viewport: the diagram renders at full size inside a fixed
+     frame so it never shrinks to fit the card. Drag empty space to pan, wheel to zoom. */
+  .loupe-diagram { position: relative; height: clamp(320px, 52vh, 580px); min-width: 0; overflow: hidden; border: 1px solid var(--hair); border-radius: var(--radius); background: var(--surface); cursor: grab; }
+  .loupe-diagram:active { cursor: grabbing; }
+  .loupe-diagram .mermaid { width: 100%; height: 100%; min-width: 0; }
+  .loupe-diagram svg { width: 100% !important; height: 100% !important; max-width: none !important; }
   .loupe-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 14px; font-size: 13px; color: var(--ink-2); }
   .loupe-legend span { display: inline-flex; align-items: center; gap: 7px; }
   .loupe-sw { width: 13px; height: 13px; border-radius: 4px; display: inline-block; }
@@ -527,11 +536,35 @@ ${lenses}
 
 <script type="module">
   import mermaid from "${MERMAID_CDN}";
-  mermaid.initialize({ startOnLoad: false, theme: "base", securityLevel: "loose", flowchart: { useMaxWidth: true } });
+  // useMaxWidth:false lets each diagram render at its natural size; svg-pan-zoom then
+  // fits it into the .loupe-diagram viewport, so a big flow stays readable instead of
+  // being scaled down to the card width.
+  mermaid.initialize({ startOnLoad: false, theme: "base", securityLevel: "loose", flowchart: { useMaxWidth: false } });
   try {
     await mermaid.run();
   } catch (e) {
     console.error("Loupe: mermaid render failed", e);
+  }
+  // Make every rendered diagram pannable/zoomable. Loaded after mermaid so the SVGs
+  // exist; isolated in its own try so a CDN/offline failure leaves diagrams static but intact.
+  try {
+    const svgPanZoom = (await import("${SVG_PAN_ZOOM_CDN}")).default;
+    for (const svg of document.querySelectorAll(".loupe-diagram .mermaid svg")) {
+      svg.style.maxWidth = "none";
+      svg.style.width = "100%";
+      svg.style.height = "100%";
+      svgPanZoom(svg, {
+        zoomEnabled: true,
+        controlIconsEnabled: true, // built-in zoom in / out / reset(fit) buttons
+        fit: true,
+        center: true,
+        minZoom: 0.2,
+        maxZoom: 12,
+        dblClickZoomEnabled: false, // leave double-click free; pan is drag, annotate is click
+      });
+    }
+  } catch (e) {
+    console.error("Loupe: pan/zoom init failed (diagrams stay static)", e);
   }
 </script>
 

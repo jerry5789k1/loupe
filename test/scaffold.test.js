@@ -101,6 +101,16 @@ test("scaffold wires mermaid, the hit (blast radius) classDef, and grill auto-wi
   assert.match(html, /window\.lavish/);
 });
 
+test("scaffold makes diagrams pannable/zoomable at full size", () => {
+  const html = createScaffoldHtml({ title: "x" });
+  // Diagrams render at natural size (not shrunk to the card)...
+  assert.match(html, /useMaxWidth: false/);
+  // ...then svg-pan-zoom fits each into its viewport.
+  assert.match(html, /svg-pan-zoom@3/);
+  assert.match(html, /\.loupe-diagram \.mermaid svg/);
+  assert.match(html, /controlIconsEnabled: true/);
+});
+
 test("interactions degrade gracefully without window.lavish", () => {
   const html = createScaffoldHtml({ title: "x" });
   // The queue() helper guards on window.lavish so opening the file directly never throws.
