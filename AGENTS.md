@@ -130,14 +130,12 @@ The playbook guidance tells agents that one artifact can combine several playboo
 Diagram guidance names hand-built div/flexbox boxes-and-arrows as an anti-pattern and points flow, architecture, state, and sequence diagrams to Mermaid unless SVG is needed.
 The bare-arg form (`lavish-axi some.html`) is normalized into `["open", "some.html"]` by `normalizeArgv`.
 
-### Telemetry
+### Telemetry — removed
 
-`src/telemetry.js` posts anonymous events to an Umami endpoint.
-The website ID and host can be baked into the bundle at build time via `LAVISH_AXI_UMAMI_HOST`/`LAVISH_AXI_UMAMI_WEBSITE_ID` env vars (consumed by `scripts/build.js` and inlined as `process.env.LAVISH_AXI_BUILD_UMAMI_*` defines).
-The build also inlines `package.json`'s version as `process.env.LAVISH_AXI_BUILD_VERSION` for the CLI/server version handshake, with source runs falling back to reading `package.json`.
-Users opt out with `LAVISH_AXI_TELEMETRY=0`.
-The client is best-effort and must never affect CLI behavior - all errors are swallowed.
-No need to explicitly document the telemetry behaviors.
+Loupe collects and sends nothing. `src/telemetry.js` is an inert no-op kept only so the CLI's
+call sites don't change; the upstream Umami integration (hardcoded host, website-id env, the
+`LAVISH_AXI_BUILD_UMAMI_*` build defines, and the workflow env) was deleted. `scripts/build.js`
+still inlines `process.env.LAVISH_AXI_BUILD_VERSION` (the version handshake), nothing else.
 
 ## Things to know when editing
 
