@@ -460,8 +460,12 @@ export function createScaffoldHtml({
      frame so it never shrinks to fit the card. Drag empty space to pan, wheel to zoom. */
   .loupe-diagram { position: relative; height: clamp(320px, 52vh, 580px); min-width: 0; overflow: hidden; border: 1px solid var(--hair); border-radius: var(--radius); background: var(--surface); cursor: grab; }
   .loupe-diagram:active { cursor: grabbing; }
-  .loupe-diagram .mermaid { width: 100%; height: 100%; min-width: 0; }
-  .loupe-diagram svg { width: 100% !important; height: 100% !important; max-width: none !important; }
+  /* margin:0 — <pre>'s default 1em top/bottom margin (~26px) otherwise overflows the
+     fixed-height frame and trips the layout audit's clipped-text check. */
+  .loupe-diagram .mermaid { width: 100%; height: 100%; min-width: 0; margin: 0; padding: 0; }
+  /* display:block removes the inline-element baseline descender gap (~6px) that
+     otherwise overflows the frame and re-trips the layout audit. */
+  .loupe-diagram svg { display: block; width: 100% !important; height: 100% !important; max-width: none !important; }
   .loupe-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 14px; font-size: 13px; color: var(--ink-2); }
   .loupe-legend span { display: inline-flex; align-items: center; gap: 7px; }
   .loupe-sw { width: 13px; height: 13px; border-radius: 4px; display: inline-block; }
