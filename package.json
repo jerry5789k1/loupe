@@ -5,8 +5,7 @@
   "description": "Inspect a change before you build it: Loupe turns a proposed change into a structured visual spec-review surface. Forked from lavish-axi.",
   "type": "module",
   "bin": {
-    "loupe": "dist/cli.mjs",
-    "lavish-axi": "dist/cli.mjs"
+    "loupe": "dist/cli.mjs"
   },
   "files": [
     "dist",

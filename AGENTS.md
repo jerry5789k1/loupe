@@ -24,7 +24,8 @@ The conceptual model lives in `CONTEXT.md`; the foundational decisions in `docs/
 decisions in `docs/v1-build-decisions.md`. **Internal identifiers stay on the lavish-axi name on purpose**
 (env vars `LAVISH_AXI_*`, state dir `~/.lavish-axi`, the server `app` id, the `window.lavish`/`data-lavish-*`
 SDK contract, the source entry `bin/lavish-axi.js`) — see ADR-0002 and decision D1. Only the user/agent-facing
-surface is "Loupe". The command is `loupe` (with `lavish-axi` kept as an alias).
+surface is "Loupe". The command is `loupe` (the package exposes only that bin; the upstream
+`lavish-axi` install is left untouched).
 
 ## Commands
 

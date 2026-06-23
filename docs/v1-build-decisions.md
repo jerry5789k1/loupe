@@ -22,12 +22,14 @@ Cost: some brand bleed in advanced help (it says `loupe` but references
 `LAVISH_AXI_HOST` and `~/.lavish-axi`). Acceptable for v1; env-var aliases can be
 added later if it grates.
 
-## D2 — `loupe` is added as a bin, `lavish-axi` is kept as an alias
+## D2 — `package.json` exposes only the `loupe` bin (revised)
 
-`package.json` exposes both `loupe` and `lavish-axi` pointing at the same bundle.
-Keeping the `lavish-axi` alias means the existing SessionStart hook context (which
-shells out to `lavish-axi`) keeps working, and there's no flag-day for muscle
-memory. `loupe` is the name we advertise.
+Initially the package also exposed a `lavish-axi` bin alias. That collided with the
+**already globally-installed published `lavish-axi`** on `npm link` (EEXIST), and it
+would have hijacked the user's upstream `lavish-axi` (which the SessionStart hook
+uses). So the alias was dropped: the package exposes only `loupe`. The upstream
+`lavish-axi` install is left untouched; `loupe` is the fork's command. Install with
+`npm link` (or `npm i -g .`) from the repo after `pnpm run build`.
 
 ## D3 — Package name `loupe` despite the npm collision
 
