@@ -6,15 +6,23 @@ This file provides guidance to coding agents when working with code in this repo
 
 Loupe is a **fork of lavish-axi**, repurposed for the spec phase: it turns a proposed change into a
 structured visual review surface so a developer can grasp it by looking and clicking instead of reading
-walls of text. Every Loupe artifact has a guaranteed shape — two **Lenses** (Product, then a Code
-Lens) each with **§A Current World** (blast radius highlighted), **§B Grill** (click-to-answer cards),
-**§C Goal Vision** (before → after). A **Gate** (a _soft signal_, ADR-0004) tells the agent to fill the
-Code Lens once the product intent is locked; it never blocks editing or annotation — the HTML is the
-source of truth and must stay freely editable and annotatable. `--product-only` drops the Code Lens.
+walls of text. Every Loupe artifact follows the **intention-first staged spine** (ADR-0008, supersedes
+the v2 two-lens/Gate shape): **① Intention** (current + target diagrams, acceptance criteria
+functional + non-functional, usage scenarios, decision **forks**), **② Code perspective** (blast
+radius _derived_ by tracing the goal through the real codebase — single-module → interface + behavior
+diff, cross-module → architecture view), **③ Destination** (before → after + a work-DAG plan whose
+nodes trace back to locked decisions + a validation pass against the acceptance criteria). The agent
+fills it **progressively** — ② is derived only after the intention locks, ③ only after ② is approved.
+Lock/approve are _soft signals_; nothing in the UI is blocked — the HTML is the source of truth and
+stays freely editable and annotatable. Governing principles: the diagram is the message (prose only
+for scalars); one diagram = one purpose; render-simplicity rule B (static HTML + mermaid + the standard
+SDK, **no bespoke per-artifact JS**); forks are opinionated and compared as diagrams; inferable things
+become confirmable assumptions on the diagram, not questions. `--product-only` drops ②; `--greenfield`
+designs ② from scratch.
 
 Loupe = lavish-axi's **transport layer, reused unchanged** + a thin **structure layer** on top:
 
-- `src/scaffold.js` + `loupe new <file>` — generate the guaranteed two-lens scaffold (with the Gate and the Decision section).
+- `src/scaffold.js` + `loupe new <file>` — generate the guaranteed staged-spine scaffold (① / ② / ③ + the Decision section).
 - `src/spec.js` + `loupe spec <file>` — write the companion markdown spec on Execute (ADR-0005).
 - `src/cli.js`, `src/skill.js` — Loupe branding and the guidance that teaches the loop.
 - Everything else (`server.js`, `artifact-sdk.js`, session store, long-poll, SSE, live reload, layout audit)

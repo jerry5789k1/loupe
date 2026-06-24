@@ -78,7 +78,7 @@ test("createSkillMarkdown teaches the three-grade annotation triage", () => {
   assert.match(md, /Tweak/);
   assert.match(md, /Follow-up/);
   assert.match(md, /Directional/);
-  assert.match(md, /reopening the product intent|reverse gate/i);
+  assert.match(md, /reopening the intention/i);
 });
 
 test("home help carries the annotation-triage protocol for the SessionStart hook", () => {

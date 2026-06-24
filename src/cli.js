@@ -19,8 +19,8 @@ import { initDefaultTelemetry } from "./telemetry.js";
 const COMMANDS = new Set(["open", "new", "spec", "poll", "end", "stop", "server", "playbook", "design", "setup"]);
 const DESCRIPTION =
   "Loupe turns a proposed change into a structured visual review surface for the spec phase, so developers grasp a change by looking and clicking instead of reading walls of text. " +
-  "Every Loupe artifact has the same guaranteed shape: §A Current World (a map of the relevant use cases with the blast radius highlighted), §B Grill (interactive cards the developer answers by clicking, each with an open field), and §C Goal Vision (a before -> after of the agreed change). " +
-  "Run `loupe new <html-file>` to scaffold that structure, fill the marked slots, then `loupe <html-file>` to open the review and `loupe poll <html-file>` to receive the developer's grill answers and annotations.";
+  "Every Loupe artifact follows the same intention-first staged spine: ① Intention (current + target diagrams, acceptance criteria, usage scenarios, and the decision forks worth the developer's judgment), ② Code perspective (the blast radius derived by tracing the goal through the real codebase), and ③ Destination (the before -> after plus a work-DAG plan and a validation pass against the acceptance criteria). The agent fills it progressively — each stage is derived only after the one above it is locked. " +
+  "Run `loupe new <html-file>` to scaffold that structure, fill ① first, then `loupe <html-file>` to open the review and `loupe poll <html-file>` to receive the developer's decisions and annotations.";
 // Inlined at build time from package.json; falls back to reading package.json so source-run tests work.
 export const VERSION =
   process.env.LAVISH_AXI_BUILD_VERSION ||
@@ -124,12 +124,12 @@ export function createHomeOutput({ bin, sessions, includeSessions = true }) {
     ],
     playbooks: listPlaybooks(),
     help: [
-      "Loupe is for the spec phase. `loupe new <html-file>` scaffolds two lenses, each with §A Current World / §B Grill / §C Goal Vision. Fill the Product Lens first (draw §A in mermaid and color the blast radius `class … hit`, write real click-to-answer Grill Cards, redraw §C from the answers). Leave the Code Lens empty until the developer clicks `Lock product intent` (a soft signal — the Code Lens is always visible/editable/annotatable): when the poll returns `PRODUCT INTENT LOCKED`, read the real codebase and fill the Code Lens (current architecture + blast radius, architecture Grill Cards, interface/architecture before -> after); greenfield projects are designed from scratch. `REOPEN PRODUCT INTENT` means go back to the Product Lens. Use `--product-only` for small changes, or `--greenfield` when there is no codebase (the Code Lens becomes a from-scratch architecture proposal, no before/after). Open with `loupe <html-file>` and poll for answers, gate signals, and annotations. Clarity over polish: prefer mermaid, drop any visual that does not aid understanding.",
+      "Loupe is for the spec phase. `loupe new <html-file>` scaffolds the intention-first spine: ① Intention, ② Code perspective, ③ Destination. Fill it PROGRESSIVELY. Fill ① only: draw current + target in mermaid (color the blast radius `class … hit`), propose acceptance criteria (functional AND non-functional) and usage scenarios, and write decision FORKS — only choices that materially change the spec and need the developer's judgment; everything you can infer becomes a confirmable assumption drawn on the diagram, never a question. Each fork is opinionated (recommend one option + why) with options compared as diagrams. When the poll returns `INTENTION LOCKED`, derive ② Code perspective: trace the REAL codebase from the goal — scope is DERIVED not chosen — and focus on interfaces (single-module: interface + behavior diff; cross-module: architecture view). When the poll returns `CODE PERSPECTIVE APPROVED`, derive ③ Destination: before → after (one diagram, one purpose) + a work-DAG plan whose nodes trace back to locked decisions with risky nodes flagged + a validation pass proving each acceptance criterion/scenario is met. `REOPEN INTENTION` re-grills ① (detail tweak → re-derive only the dependent subgraph; goal deviation → from scratch). `--product-only` skips ②; `--greenfield` designs ② from scratch (no before/after). The diagram is the message; one diagram one purpose; static HTML + mermaid only, no bespoke JS.",
       "Run `loupe <html-file>` to open or resume a Loupe review session",
       "Unless the user specifies another location, create HTML artifacts in the current working directory under `.lavish/`",
       "Lavish serves the html file through a local express.js server. If your html needs to reference other filesystem assets such as images, CSS, fonts, and local scripts, copy them into the same directory as the HTML file, then reference them with relative paths from that directory. Never prepend `/` to those asset paths - root paths won't work",
       "Run `loupe poll <html-file>` to wait for user feedback or browser-reported layout_warnings. It long-polls and stays silent until the user sends feedback, ends the session, or the real browser reports fresh layout_warnings, so leave it running - never kill it. Fix layout_warnings before involving the human. If your harness limits how long a foreground command may run, run the poll as a background task; if it gets killed or times out anyway, just re-run it - queued feedback is never lost",
-      "Triage each annotation the poll returns and say which grade you assigned: a Tweak (local/cosmetic) -> patch the HTML in place; a Follow-up (a question / more detail) -> adjust that section within the current lens; Directional feedback (challenges the agreed product intent) -> do not silently redraw, ask the developer to confirm reopening the product intent first.",
+      "Triage each annotation the poll returns and say which grade you assigned: a Tweak (local/cosmetic, including a corrected assumption on the diagram) -> patch the HTML in place; a Follow-up (a question / more detail) -> adjust that section within the current stage; Directional feedback (challenges the locked intention) -> do not silently redraw, ask the developer to confirm reopening the intention first.",
       "Run `loupe end <html-file>` to end a session",
       "Run `loupe stop` to shut down the background server (it also self-stops when idle or after the last session ends with nothing connected)",
       `Run \`loupe playbook <playbook_id>\` for focused artifact guidance. ${PLAYBOOK_ROUTER_HELP}`,
@@ -198,20 +198,20 @@ export function deriveTitleFromPath(file) {
 }
 
 export function createNewOutput({ file, productOnly = false, greenfield = false }) {
-  const productSteps = `Fill the Product Lens \`LOUPE — fill:\` slots first: redraw §A as the real use-case flow with the Blast Radius colored (\`class … hit\`; quote mermaid labels with punctuation, e.g. \`X["Pay (guest)"]\`, since a bare \`&\` or \`(\` breaks the parse), replace the example Grill Cards with real product questions, and redraw §C Goal Vision once the user's grill answers arrive.`;
+  const intentionSteps = `Fill stage ① Intention ONLY (leave ②③ for later): draw the CURRENT state from the real code/context and the TARGET state as your read of the intent, coloring the Blast Radius (\`class … hit\`; quote mermaid labels with punctuation, e.g. \`X["Pay (guest)"]\`, since a bare \`&\` or \`(\` breaks the parse). Propose acceptance criteria (functional AND non-functional) and usage scenarios, then write real decision FORKS — only choices that materially change the spec and need the developer's judgment; everything inferable is a confirmable assumption on the diagram, not a question. Make each fork opinionated (recommend one + why) with options compared as diagrams.`;
   const codeSteps = greenfield
-    ? ` Leave the Code Lens empty until the user clicks "Lock product intent". When the poll returns "PRODUCT INTENT LOCKED", design the architecture FROM SCRATCH (this is greenfield — there is no codebase to read): §A proposed architecture marking the new pieces (\`class … new\`), design Grill Cards, then §C the interfaces/contracts to add (no before/after).`
-    : ` Leave the Code Lens empty until the user clicks "Lock product intent" (a soft signal that never locks the UI). When the poll returns "PRODUCT INTENT LOCKED", read the real codebase and fill the Code Lens (§A current architecture + blast radius, architecture Grill Cards, then the interface/architecture before → after). If the poll returns "REOPEN PRODUCT INTENT", go back and re-grill the Product Lens.`;
-  const gateSteps = productOnly ? "" : codeSteps;
+    ? ` When the poll returns "INTENTION LOCKED", derive stage ② FROM SCRATCH (greenfield — no codebase to read): design the architecture marking new pieces (\`class … new\`) and the interfaces/contracts to add, then write the code forks. No before/after.`
+    : ` When the poll returns "INTENTION LOCKED", derive stage ② Code perspective: trace the REAL codebase from the goal (scope is DERIVED, not chosen), state the derived scope, draw the blast radius, and write the code forks (single-module → interface + behavior diff; cross-module → architecture view). "REOPEN INTENTION" re-grills ①.`;
+  const destinationSteps = ` When the poll returns "CODE PERSPECTIVE APPROVED", derive stage ③ Destination: before → after (one diagram, one purpose), the work-DAG plan (nodes ⟵ locked decisions, risky nodes ⚠), and a validation pass against every acceptance criterion and usage scenario.`;
+  const derivedSteps = productOnly ? destinationSteps : `${codeSteps}${destinationSteps}`;
   return {
     scaffold: {
       file,
-      lenses: productOnly ? ["Product"] : ["Product", "Code"],
+      stages: productOnly ? ["① Intention", "③ Destination"] : ["① Intention", "② Code perspective", "③ Destination"],
       mode: productOnly ? "product-only" : greenfield ? "greenfield" : "brownfield",
-      sections: ["§A Current World", "§B Grill", "§C Goal Vision"],
-      gated: !productOnly,
+      progressive: true,
     },
-    next_step: `Loupe scaffold written to ${file}. ${productSteps}${gateSteps} Then run \`loupe ${file}\` to open the review and \`loupe poll ${file}\` to receive grill answers, gate signals, and annotations. Do not respond to the user until the Product Lens is filled and opened.`,
+    next_step: `Loupe scaffold written to ${file}. ${intentionSteps}${derivedSteps} Then run \`loupe ${file}\` to open the review and \`loupe poll ${file}\` to receive decisions, lock/approve signals, and annotations. Do not respond to the user until stage ① is filled and opened.`,
   };
 }
 
@@ -241,7 +241,7 @@ async function newCommand(args) {
 export function createSpecOutput({ specFile, htmlFile }) {
   return {
     spec: { file: specFile, canonical: htmlFile },
-    next_step: `Companion spec written to ${specFile}. Fill the \`…\` slots with the decisions this Loupe Session actually settled (problem, blast radius, before → after for each lens, interface delta). It links back to the canonical artifact ${htmlFile} and is the source of truth for implementation — keep it in version control. Once filled, begin building the change.`,
+    next_step: `Companion spec written to ${specFile}. Fill the \`…\` slots with the decisions this Loupe Session actually settled (intent, acceptance criteria, blast radius, before → after, interface delta, the work-DAG plan). It links back to the canonical artifact ${htmlFile} and is the source of truth for implementation — keep it in version control. Once filled, begin building the change.`,
   };
 }
 
@@ -269,7 +269,9 @@ async function specCommand(args) {
     ]);
   }
   const html = readFileSync(absoluteHtml, "utf8");
-  const productOnly = !html.includes('id="code-lens"');
+  // The v3 scaffold marks product-only on the root tag; fall back to the absence
+  // of the ② code stage for hand-written or older artifacts.
+  const productOnly = html.includes('data-loupe-product-only="true"') || !html.includes('id="code"');
   const greenfield = html.includes("data-loupe-greenfield");
   const title = deriveTitleFromPath(absoluteHtml);
   await mkdir(path.dirname(specFile), { recursive: true });
@@ -764,8 +766,8 @@ const TOP_LEVEL_HELP = `loupe - Loupe\n\nUsage:\n  loupe\n  loupe <html-file> [-
 
 const COMMAND_HELP = {
   open: `Usage: loupe <html-file> [--no-open] [--no-gate]\n\nOpen or resume a Loupe review session for an HTML artifact. Use --no-open when you need to ensure the server/session exists without opening another browser window. Use --no-gate to skip the open-time layout curtain for this browser open.\n`,
-  new: `Usage: loupe new <html-file> [--title "..."] [--problem "..."] [--product-only] [--force]\n\nWrite a Loupe scaffold: a self-contained HTML artifact with two lenses, each holding §A Current World, §B Grill, and §C Goal Vision, mermaid containers, and auto-wired Grill Cards. Fill the Product Lens first; leave the Code Lens empty until the user locks the product intent, then fill it from the real codebase. The gate is a soft signal — the Code Lens is never UI-locked, so it stays editable and annotatable. Fill the \`LOUPE — fill:\` slots, then open it with \`loupe <html-file>\`. Pass --product-only for a single Product Lens (small changes), or --greenfield when there is no codebase yet (the Code Lens becomes a from-scratch architecture proposal instead of current → after). Refuses to overwrite an existing file unless --force is passed.\n`,
-  spec: `Usage: loupe spec <html-file> [--out <file.md>] [--force]\n\nWrite the companion spec for a Loupe artifact: a terse markdown file (default \`<html-file>.spec.md\`) with the decisions list and a link back to the canonical HTML. Run this when the developer clicks Execute; fill the \`…\` slots with what the Session settled, keep it in version control, and use it as the source of truth for implementation. Detects product-only vs dual-lens from the artifact. Refuses to overwrite unless --force.\n`,
+  new: `Usage: loupe new <html-file> [--title "..."] [--problem "..."] [--product-only] [--greenfield] [--force]\n\nWrite a Loupe scaffold: a self-contained HTML artifact with the intention-first staged spine — ① Intention (current + target diagrams, acceptance criteria, usage scenarios, decision forks), ② Code perspective, ③ Destination — mermaid containers, and auto-wired forks. Fill it progressively: stage ① first; derive ② only after the developer locks the intention, and ③ only after they approve ②. Fill the \`LOUPE — fill:\` slots, then open it with \`loupe <html-file>\`. Pass --product-only to skip ② (small changes), or --greenfield when there is no codebase yet (② is designed from scratch, no before/after). Refuses to overwrite an existing file unless --force is passed.\n`,
+  spec: `Usage: loupe spec <html-file> [--out <file.md>] [--force]\n\nWrite the companion spec for a Loupe artifact: a terse markdown file (default \`<html-file>.spec.md\`) with the decisions list and a link back to the canonical HTML. Run this when the developer clicks Execute; fill the \`…\` slots with what the Session settled, keep it in version control, and use it as the source of truth for implementation. Detects product-only vs full spine from the artifact. Refuses to overwrite unless --force.\n`,
   poll: `Usage: loupe poll <html-file> [--agent-reply "..."]\n\nThis command long-polls indefinitely for queued user prompts and browser-reported layout_warnings, then returns them to the agent. It stays silent while it waits - that is normal, never kill it. Fix layout_warnings before involving the human. Do not pass --timeout-ms during normal agent use; it is for tests and debugging only. If your harness limits how long a foreground command may run, run the poll as a background task and wait for it to finish; if it still gets killed or times out, just re-run it - queued feedback is never lost. Use --agent-reply after applying prior feedback to display your response in Loupe before waiting again.\n`,
   end: `Usage: loupe end <html-file>\n\nEnd a Loupe session.\n`,
   stop: `Usage: loupe stop [--port <port>]\n\nShut down the background Loupe server. The server also stops itself when no browser or poll has been connected for a while (LAVISH_AXI_IDLE_TIMEOUT_MS, default 30m) and immediately when the last session ends with nothing connected.\n`,

@@ -11,76 +11,83 @@ import {
 import { createScaffoldHtml } from "../src/scaffold.js";
 import { createSpecMarkdown, deriveSpecPath } from "../src/spec.js";
 
-test("scaffold guarantees both lenses, each with §A -> §B -> §C in order", () => {
+test("scaffold guarantees the three-stage spine, in order (ADR-0008)", () => {
   const html = createScaffoldHtml({ title: "Guest checkout" });
-  const ids = [
-    "product-current-world",
-    "product-grill",
-    "product-vision",
-    "code-current-world",
-    "code-grill",
-    "code-vision",
-  ];
+  const ids = ["intention", "code", "destination"];
   const positions = ids.map((id) => html.indexOf(`id="${id}"`));
   assert.ok(
     positions.every((p) => p > -1),
-    "all six lens sections present",
+    "all three stages present",
   );
   for (let i = 1; i < positions.length; i++) {
     assert.ok(positions[i] > positions[i - 1], `${ids[i]} comes after ${ids[i - 1]}`);
   }
+  assert.match(html, /data-loupe-scaffold="v3"/);
 });
 
-test("the Gate sits before the Code Lens and is a soft signal (no UI lock)", () => {
+test("stage ① intention carries the acceptance test (criteria + scenarios) and forks", () => {
   const html = createScaffoldHtml({ title: "x" });
-  const gate = html.indexOf('id="lens-gate"');
-  const codeLens = html.indexOf('id="code-lens"');
-  assert.ok(gate > -1 && codeLens > gate, "gate appears before the code lens");
-  assert.match(html, /data-loupe-lock/, "has a lock-product-intent control");
-  assert.match(html, /data-loupe-reopen/, "has a reverse-gate reopen control");
+  assert.match(html, /data-loupe-criteria="functional"/);
+  assert.match(html, /data-loupe-criteria="non-functional"/);
+  assert.match(html, /data-loupe-scenarios/);
+  assert.match(html, /data-loupe-fork/, "decision forks present");
+  // current + target picture, verified on the diagram
+  assert.match(html, /Current/);
+  assert.match(html, /Target/);
 });
 
-test("the Code Lens never blocks editing or annotation (HTML is the source of truth)", () => {
+test("forks are opinionated: a recommended option and a per-option trade-off", () => {
+  const html = createScaffoldHtml({ title: "x" });
+  assert.match(html, /data-recommended/, "one option is marked recommended");
+  assert.match(html, /loupe-opt-trade/, "options carry a gain/cost trade-off");
+  assert.match(html, /loupe-fork-why/, "the agent's reasoning slot is present");
+});
+
+test("nothing blocks editing or annotation (HTML is the source of truth)", () => {
   const html = createScaffoldHtml({ title: "x" });
   assert.doesNotMatch(html, /loupe-lock-overlay/, "no blocking lock overlay");
-  assert.doesNotMatch(html, /loupe-codelens locked/, "code lens is not shipped locked");
-  // pointer-events:none is only allowed on the decorative gesture hint, where it makes
-  // the hint click-THROUGH (the opposite of blocking). Nothing else may disable interaction.
+  // pointer-events:none must never sit on content — the v3 scaffold has none at all.
   for (const line of html.match(/[^\n]*pointer-events: none[^\n]*/g) || []) {
-    assert.match(line, /loupe-diagram-hint/, "pointer-events:none only on the click-through hint, never on content");
+    assert.fail(`unexpected pointer-events:none — would block interaction: ${line}`);
   }
 });
 
-test("--product-only drops the Gate and Code Lens", () => {
-  const html = createScaffoldHtml({ title: "x", productOnly: true });
-  assert.match(html, /id="product-current-world"/);
-  assert.doesNotMatch(html, /id="code-lens"/);
-  assert.doesNotMatch(html, /id="lens-gate"/);
-  assert.doesNotMatch(html, /Gate — agree the product change/);
+test("lock / approve / reopen send the staged signals to the agent", () => {
+  const html = createScaffoldHtml({ title: "x" });
+  assert.match(html, /data-loupe-lock/, "lock intention control");
+  assert.match(html, /data-loupe-approve="code"/, "approve code perspective control");
+  assert.match(html, /data-loupe-reopen/, "reopen intention control");
+  assert.match(html, /INTENTION LOCKED/);
+  assert.match(html, /CODE PERSPECTIVE APPROVED/);
+  assert.match(html, /REOPEN INTENTION/);
 });
 
-test("--greenfield reshapes the Code Lens for from-scratch design", () => {
+test("--product-only drops the ② code stage but keeps ① and ③", () => {
+  const html = createScaffoldHtml({ title: "x", productOnly: true });
+  assert.match(html, /id="intention"/);
+  assert.match(html, /id="destination"/);
+  assert.match(html, /data-loupe-product-only="true"/);
+  assert.doesNotMatch(html, /id="code"/, "no code perspective stage");
+});
+
+test("--greenfield designs ② from scratch (no before/after)", () => {
   const html = createScaffoldHtml({ title: "x", greenfield: true });
   assert.match(html, /data-loupe-greenfield="true"/, "root marks greenfield for `loupe spec` to detect");
-  assert.match(html, /Proposed Architecture/);
-  assert.match(html, /Interfaces &amp; contracts/);
-  assert.match(html, /loupe-contracts/);
+  assert.match(html, /from scratch/i);
   assert.match(html, /classDef new/);
-  // still gated, still annotatable, no blocking
-  assert.match(html, /id="code-lens"/);
-  assert.doesNotMatch(html, /loupe-lock-overlay/);
+  assert.match(html, /id="code"/);
 });
 
-test("the default (brownfield) Code Lens keeps the current → after framing", () => {
+test("the default (brownfield) ② derives scope from the real codebase", () => {
   const html = createScaffoldHtml({ title: "x" });
   assert.doesNotMatch(html, /data-loupe-greenfield/);
-  assert.doesNotMatch(html, /Proposed Architecture/);
-  assert.match(html, /Current Architecture/);
+  assert.match(html, /Scope is <b>derived, not chosen<\/b>|derived, not chosen/);
+  assert.match(html, /data-loupe-scope/);
 });
 
-test("--product-only wins over --greenfield (no Code Lens at all)", () => {
+test("--product-only wins over --greenfield (no ② stage at all)", () => {
   const html = createScaffoldHtml({ title: "x", productOnly: true, greenfield: true });
-  assert.doesNotMatch(html, /id="code-lens"/);
+  assert.doesNotMatch(html, /id="code"/);
   assert.doesNotMatch(html, /data-loupe-greenfield/);
 });
 
@@ -97,47 +104,34 @@ test("scaffold escapes HTML in title and problem", () => {
   assert.match(html, /a &quot;b&quot; &lt;c&gt;/);
 });
 
-test("scaffold wires mermaid, the hit (blast radius) classDef, and grill auto-wiring", () => {
+test("scaffold wires mermaid, the hit (blast radius) classDef, and fork auto-wiring", () => {
   const html = createScaffoldHtml({ title: "x" });
   assert.match(html, /mermaid@11/);
   assert.match(html, /classDef hit/);
-  assert.match(html, /form\[data-loupe-grill\]/);
+  assert.match(html, /form\[data-loupe-fork\]/);
   assert.match(html, /window\.lavish/);
 });
 
-test("scaffold makes diagrams pannable/zoomable at full size", () => {
+test("render-simplicity rule B: static HTML + mermaid only, NO bespoke JS (pan/zoom retired)", () => {
   const html = createScaffoldHtml({ title: "x" });
-  // useMaxWidth:true keeps a viewBox (no transient overflow); svg-pan-zoom then
-  // fits/enlarges each diagram to fill its tall viewport.
+  // useMaxWidth:true lets mermaid fit the container width — one diagram, one purpose.
   assert.match(html, /useMaxWidth: true/);
-  assert.match(html, /svg-pan-zoom@3/);
-  assert.match(html, /\.loupe-diagram \.mermaid svg/);
-  assert.match(html, /controlIconsEnabled: true/);
-  // pan/zoom must not swallow the click the annotation picker needs (artifact-sdk.js
-  // listens for click in capture phase); preventMouseEventsDefault:false keeps nodes annotatable.
-  assert.match(html, /preventMouseEventsDefault: false/);
-  // A plain wheel must scroll the page, not hijack it: native wheel-zoom off, and
-  // zoom only on a modifier+wheel at the cursor.
-  assert.match(html, /mouseWheelZoomEnabled: false/);
-  assert.match(html, /e\.ctrlKey \|\| e\.metaKey/);
-  assert.match(html, /zoomAtPointBy/);
-  // The fixed-height frame must not overflow, or the layout audit flags clipped-text:
-  // zero the <pre> margin and block the svg to kill its baseline descender gap.
-  assert.match(html, /\.loupe-diagram \.mermaid \{[^}]*margin: 0/);
-  assert.match(html, /\.loupe-diagram svg \{ display: block/);
+  // the v2 svg-pan-zoom engine and its API are gone.
+  assert.doesNotMatch(html, /svg-pan-zoom/);
+  assert.doesNotMatch(html, /zoomAtPointBy/);
+  assert.doesNotMatch(html, /controlIconsEnabled/);
+  // mermaid is the only imported module besides the standard SDK.
+  const imports = [...html.matchAll(/import .* from "[^"]+"/g)].map((m) => m[0]);
+  assert.ok(
+    imports.every((line) => line.includes("mermaid")),
+    `only mermaid is imported, got: ${imports.join(" | ")}`,
+  );
 });
 
 test("interactions degrade gracefully without window.lavish", () => {
   const html = createScaffoldHtml({ title: "x" });
-  // The queue() helper guards on window.lavish so opening the file directly never throws.
   assert.match(html, /if \(!\(window\.lavish && typeof window\.lavish\.queuePrompt === "function"\)\) return;/);
   assert.match(html, /setAttribute\("data-answered", "true"\)/);
-});
-
-test("the gate lock and reopen send signals to the agent", () => {
-  const html = createScaffoldHtml({ title: "x" });
-  assert.match(html, /PRODUCT INTENT LOCKED/);
-  assert.match(html, /REOPEN PRODUCT INTENT/);
 });
 
 test("deriveTitleFromPath humanizes the filename", () => {
@@ -146,20 +140,21 @@ test("deriveTitleFromPath humanizes the filename", () => {
   assert.equal(deriveTitleFromPath(".html"), "Untitled change");
 });
 
-test("createNewOutput reports both lenses and the gated workflow by default", () => {
+test("createNewOutput reports the full progressive spine by default", () => {
   const out = createNewOutput({ file: "/abs/x.html" });
-  assert.deepEqual(out.scaffold.lenses, ["Product", "Code"]);
-  assert.equal(out.scaffold.gated, true);
-  assert.match(out.next_step, /LOUPE — fill|Product Lens/);
-  assert.match(out.next_step, /PRODUCT INTENT LOCKED/);
+  assert.deepEqual(out.scaffold.stages, ["① Intention", "② Code perspective", "③ Destination"]);
+  assert.equal(out.scaffold.progressive, true);
+  assert.match(out.next_step, /stage ① Intention ONLY/);
+  assert.match(out.next_step, /INTENTION LOCKED/);
+  assert.match(out.next_step, /CODE PERSPECTIVE APPROVED/);
   assert.match(out.next_step, /loupe \/abs\/x\.html/);
 });
 
-test("createNewOutput in product-only mode reports a single lens and no gate", () => {
+test("createNewOutput in product-only mode reports two stages and no ② derivation", () => {
   const out = createNewOutput({ file: "/abs/x.html", productOnly: true });
-  assert.deepEqual(out.scaffold.lenses, ["Product"]);
-  assert.equal(out.scaffold.gated, false);
-  assert.doesNotMatch(out.next_step, /PRODUCT INTENT LOCKED/);
+  assert.deepEqual(out.scaffold.stages, ["① Intention", "③ Destination"]);
+  assert.doesNotMatch(out.next_step, /CODE PERSPECTIVE APPROVED.*INTENTION LOCKED/s);
+  assert.doesNotMatch(out.next_step, /trace the REAL codebase/);
 });
 
 test("createNewOutput in greenfield mode tells the agent to design from scratch", () => {
@@ -189,21 +184,23 @@ test("deriveSpecPath maps the html path to a sibling .spec.md", () => {
   assert.equal(deriveSpecPath("/abs/x.htm"), "/abs/x.spec.md");
 });
 
-test("companion spec carries the title, a link back, and the lens decisions", () => {
+test("companion spec carries the title, a link back, and the staged decisions", () => {
   const md = createSpecMarkdown({ title: "Guest checkout", htmlBasename: "guest-checkout.html" });
   assert.match(md, /# Guest checkout — spec/);
   assert.match(md, /\]\(\.\/guest-checkout\.html\)/);
-  assert.match(md, /## Product Lens/);
-  assert.match(md, /## Code Lens/);
+  assert.match(md, /## ① Intention/);
+  assert.match(md, /## ② Code perspective/);
+  assert.match(md, /## ③ Destination/);
+  assert.match(md, /Acceptance criteria/);
 });
 
-test("product-only companion spec omits the Code Lens", () => {
+test("product-only companion spec omits the ② code perspective", () => {
   const md = createSpecMarkdown({ title: "x", htmlBasename: "x.html", productOnly: true });
-  assert.match(md, /## Product Lens/);
-  assert.doesNotMatch(md, /## Code Lens/);
+  assert.match(md, /## ① Intention/);
+  assert.doesNotMatch(md, /## ② Code perspective/);
 });
 
-test("greenfield companion spec frames the Code Lens as from-scratch", () => {
+test("greenfield companion spec frames ② as from-scratch", () => {
   const md = createSpecMarkdown({ title: "x", htmlBasename: "x.html", greenfield: true });
   assert.match(md, /greenfield/i);
   assert.match(md, /Proposed architecture/);
