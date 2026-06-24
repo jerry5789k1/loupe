@@ -43,3 +43,31 @@ _Avoid_: template, skeleton, layout
 **Execute**:
 The developer's final decision to green-light the change. Hands the locked Spec back to the coding agent to begin implementation — not a copy-paste handoff. Its opposites are Cancel and Adjust.
 _Avoid_: approve, ship, commit
+
+---
+
+> **Model in revision (ADR-0008).** The two-Lens-up-front shape (Lens / Gate / Scaffold of both lenses, each §A/§B/§C) is being superseded by an **intention-first staged spine**. The terms below are the language of that new model; **Lens** and **Gate** as "two full perspectives drawn up front with a checkpoint between" are retired — the product and code-structure perspectives survive as *sequenced, scope-gated stages*, not parallel lenses.
+
+**Intention**:
+The developer's actual goal for the change — what they want to be true after, not how to build it. The single source of truth a Loupe Session is organized around: it is captured and locked first (Stage ①), and everything downstream is derived from it, so re-opening it invalidates what follows.
+_Avoid_: requirement, ask, spec (the Spec is the *output*; Intention is the *input*)
+
+**Stage**:
+One step of the spine, drawn only after the previous one is locked: ① Intention, ② Code Perspective, ③ Destination. Progressive disclosure — nothing in a later Stage is rendered until what it depends on is locked, so a change of mind upstream never forces a downstream redraw.
+_Avoid_: phase, lens, section
+
+**Decision Fork**:
+A point where the design genuinely splits into two or more viable paths, the choice *materially* changes the spec/plan, and *which* path to take needs the developer's judgment (the agent cannot resolve it from code/context). The only thing that earns a grill question. Each Fork is opinionated (carries the agent's recommended option + reasoning) and its options are compared as small outcome diagrams, not a prose menu.
+_Avoid_: question, choice, option (reserve "option" for the branches *within* a Fork)
+
+**Confirmable Assumption**:
+Something the agent *can* infer from the code or context, rendered on the diagram as a stated assumption the developer corrects by annotating — never asked as a question. The complement of a Decision Fork: inferable ⇒ assumption, judgment-required ⇒ fork.
+_Avoid_: default, guess, prefilled answer
+
+**Acceptance Criteria**:
+The conditions that must hold for the change to be accepted — both **functional** (what it must do) and **non-functional** (how well: latency, privacy, security, accessibility, cost). Captured in Stage ① as the spec's test. The agent proposes a starter set and actively hunts the gaps (especially the NFRs humans forget); the developer is the authority and edits freely. A live guard, re-checked on every redraw — a fork option that would break one is flagged ✗ at the moment of choice.
+_Avoid_: requirements, definition of done, checklist
+
+**Usage Scenario**:
+A concrete situation the design must handle, rendered diagram-first as a traced path through the Current/Target diagram (a scenario is a walk across the map). Each Acceptance Criterion links to the scenario(s) that exercise it; at the Destination the agent traces each scenario through the after-diagram to prove — or disprove — that the design satisfies the criteria.
+_Avoid_: use case, user story, test case
